@@ -3,264 +3,60 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#06070b">
+  <meta name="theme-color" content="#05060a">
   <meta name="color-scheme" content="dark">
   <title>PRISM — One race. Multiple perspectives.｜競馬予想AI</title>
-  <meta name="description" content="競馬予想AI「PRISM」。8 つの能力モデルの視点を 1 つの確率にまとめる予想エンジンが、どう作られ、何がわかり、なぜこの形になったのか。検証済みの数字で紹介します。">
+  <meta name="description" content="競馬予想AI「PRISM」の物語。8つのAIの視点を1つの確率にまとめる予想エンジンが、どう生まれ、何がわかったのか。触って体験する11のシーン。">
   <meta property="og:title" content="PRISM — One race. Multiple perspectives.">
-  <meta property="og:description" content="競馬AIは、ここまで進化した。8 つの視点で 1 つのレースを読む予想エンジン PRISM の仕組みと検証。">
+  <meta property="og:description" content="競馬AIは、ここまで進化した。触って体験する、予想エンジン PRISM の物語。">
   <meta property="og:type" content="website">
-  <meta property="og:image" content="assets/og.png">
+  <meta property="og:image" content="https://wata9857-ops.github.io/prism/assets/og.png">
   <meta name="twitter:card" content="summary_large_image">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; base-uri 'self'; form-action 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="css/prism.css?v=2">
+  <link rel="stylesheet" href="css/prism.css?v=5">
 </head>
 <body>
-  <!-- ===== Opening ===== -->
-  <div id="opening" aria-hidden="true">
-    <canvas id="op-canvas"></canvas>
-    <div class="op-title">
-      <img class="op-word" id="op-word" src="assets/wordmark.svg" alt="PRISM" width="560" height="145">
-      <div class="op-tag" id="op-tag"><b>One race.</b> Multiple perspectives.</div>
+  <canvas id="bg" aria-hidden="true"></canvas>
+  <div class="vignette" aria-hidden="true"></div>
+
+  <header class="hud">
+    <button class="brand" id="brand" type="button" aria-label="目次を開く"><img src="assets/mark.svg" alt="" width="28" height="28"><img src="assets/wordmark.svg" alt="PRISM" width="70" height="18"></button>
+    <span class="chip-ch" id="chip"></span>
+    <button class="iconbtn" id="b-menu" type="button" aria-label="目次"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  </header>
+
+  <main id="stage"></main>
+  <p class="sr" id="live" aria-live="polite"></p>
+  <p class="hint" id="hint" aria-live="polite"></p>
+
+  <nav class="bar" id="bar" aria-label="シーンの操作">
+    <button class="iconbtn" id="b-prev" type="button" aria-label="前のシーン"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <div class="prog" id="prog" role="group" aria-label="章"></div>
+    <button class="iconbtn" id="b-replay" type="button" aria-label="このシーンをもう一度"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 3-6.2M4 4v4h4"/></svg></button>
+    <button class="iconbtn" id="b-pause" type="button" aria-label="一時停止"><svg viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></svg></button>
+    <button class="nextbtn" id="b-next" type="button" aria-label="次のシーン"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+  </nav>
+
+  <div class="menu" id="menu" role="dialog" aria-modal="true" aria-labelledby="menu-h" aria-hidden="true">
+    <div class="menu-head"><h2 id="menu-h">目次</h2><button class="iconbtn" id="menu-close" type="button" aria-label="閉じる"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="menu-grid" id="menu-grid"></div>
+    <div class="menu-foot">
+      <button class="btn" type="button" id="m-restart">最初から</button>
+      <label><input type="checkbox" id="m-auto"> 章の扉を自動で進める</label>
+      <a class="btn" href="https://wata9857-ops.github.io/jra-ai-analytics-web/" rel="noopener">予想サイトへ ↗</a>
     </div>
   </div>
-  <button class="skip" id="skip" type="button">スキップ ›</button>
 
-  <div class="bar" aria-hidden="true"><i id="progress"></i></div>
-  <header class="top" id="top">
-    <a class="logo" href="#hero" aria-label="PRISM トップへ">
-      <img src="assets/mark.svg" alt="" width="30" height="30"><img src="assets/wordmark.svg" alt="PRISM" width="78" height="20">
-    </a>
-    <a class="top-cta" href="https://wata9857-ops.github.io/jra-ai-analytics-web/" rel="noopener">予想サイトへ ›</a>
-  </header>
-  <nav class="dots" id="dots" aria-label="章"></nav>
+  <div class="scrim" id="scrim"></div>
+  <aside class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" aria-hidden="true">
+    <div class="grip" aria-hidden="true"></div>
+    <div class="sheet-head"><h3 id="sheet-title"></h3><button class="iconbtn" id="sheet-close" type="button" aria-label="閉じる"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div id="sheet-body"></div>
+  </aside>
 
-  <main id="main">
-    <!-- ===== Hero ===== -->
-    <section id="hero" class="ch" data-title="PRISM">
-      <canvas class="beam" id="hero-canvas" aria-hidden="true"></canvas>
-      <div class="wrap">
-        <img class="hero-mark" src="assets/mark.svg" alt="" width="180" height="180"><h1 class="hero-word"><img src="assets/wordmark.svg" alt="PRISM" width="640" height="166"></h1>
-        <p class="hero-tag">ONE RACE. MULTIPLE PERSPECTIVES.</p>
-        <p class="hero-sub">ひとつのレースを、8 つの視点で。<span>白い光がプリズムで虹に分かれるように。<br>過去 30 年分のレースを、性質の違う 8 つの AI が別々の角度から読み、ひとつの確率にまとめます。</span></p>
-        <a class="scrollcue" href="#question">SCROLL<i></i></a>
-      </div>
-    </section>
-
-    <!-- ===== Question ===== -->
-    <section id="question" class="ch" data-title="問い">
-      <div class="wrap kin" id="kin">
-        <span class="row">1番人気は、</span>
-        <span class="row">どれくらい勝つのか。</span>
-        <span class="row"><span class="big num" id="fav-win">33%</span></span>
-        <span class="row">残りの 67% を、どう読むか。</span>
-        <small class="row">2021〜2026年・新馬戦を除く全平地レースで、1番人気が勝った割合。市場（オッズ）は、それだけで強い予想です。</small>
-      </div>
-    </section>
-
-    <!-- ===== History ===== -->
-    <section id="history" class="ch" data-title="歩み">
-      <div class="wrap">
-        <span class="kicker">Chapter 1 · History</span>
-        <h2 class="h reveal">作っては、<em>確かめる。</em><br>その繰り返しで、ここまで来た。</h2>
-        <p class="lead reveal">うまくいかなかった試みも、すべて記録に残しています。PRISM は「良さそうに見える」ではなく、<b>学習に使っていない年で確かめた結果</b>だけを積み重ねた形です。</p>
-        <div class="tl reveal">
-          <div class="tl-track" id="tl-track" role="tablist" aria-label="開発の歩み"></div>
-          <div class="tl-panel card" id="tl-panel" role="tabpanel" aria-live="polite"></div>
-          <div class="tl-nav"><button class="btn" id="tl-prev" type="button">‹ 前へ</button><button class="btn" id="tl-next" type="button">次へ ›</button></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===== How it works ===== -->
-    <section id="how" class="ch" data-title="仕組み">
-      <div class="wrap">
-        <span class="kicker">Chapter 2 · Architecture</span>
-        <h2 class="h reveal">データから買い目まで、<br><em class="cool">10 の工程。</em></h2>
-        <p class="lead reveal">それぞれの工程で、何をしているのか。押して確かめてください。</p>
-        <div class="pipe reveal">
-          <ul class="pipe-list" id="pipe-list" role="tablist" aria-label="処理の工程"></ul>
-          <div class="pipe-view card" id="pipe-view" role="tabpanel" aria-live="polite"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===== Features ===== -->
-    <section id="features" class="ch" data-title="44の視点">
-      <div class="wrap">
-        <span class="kicker">Chapter 3 · Features</span>
-        <h2 class="h reveal">「この馬は、<em>この条件で</em>どうか」を<br>44 の数字で表す。</h2>
-        <p class="lead reveal">v52 で加えたのは、レースの条件ごとの適性です。どのグループが本当に効いているかは、<b>そのグループだけを外して学習し直す</b>実験（アブレーション）で確かめました。棒が長いほど、外したときに予想が悪くなった＝ほかでは代わりがきかない情報です。</p>
-        <div class="seg reveal" role="group" aria-label="指標の切り替え" id="feat-metric">
-          <button type="button" aria-pressed="true" data-m="d_order">1〜3着の並び</button>
-          <button type="button" aria-pressed="false" data-m="d_win">勝ち馬</button>
-        </div>
-        <div class="feat-groups reveal" id="feat-groups"></div>
-        <div class="grid2 feat-detail">
-          <div class="card reveal" id="feat-info"></div>
-          <div class="card reveal">
-            <h3>効いていた特徴量 トップ 10</h3>
-            <p class="note">その特徴量だけをレースの間でシャッフルしたとき、予想がどれだけ悪くなったか（大きいほど重要）。</p>
-            <div class="hbars" id="perm-bars"></div>
-          </div>
-        </div>
-        <div class="card reveal dist-demo" style="margin-top:28px">
-          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
-            <h3 style="margin:0">体験：距離が近い過去のレースほど重く見る</h3><span class="tag sim">簡略化した例</span>
-          </div>
-          <p class="note">ある馬の過去 6 走のスピード指数（架空の値）。今回の距離を動かすと、距離の近いレースほど重く（濃く）数えられ、「この距離での実力」が変わります。PRISM はこれを距離・馬場・コースごとに計算しています。</p>
-          <div class="grid2" style="align-items:center">
-            <svg class="chart" id="dist-svg" viewBox="0 0 520 220" role="img" aria-label="過去走の距離とスピード指数"></svg>
-            <div>
-              <label for="dist-range" class="note">今回のレースの距離：<b id="dist-val" class="num">2000m</b></label>
-              <input type="range" id="dist-range" min="1000" max="3600" step="100" value="2000">
-              <div style="display:flex;gap:28px;margin-top:16px;flex-wrap:wrap">
-                <div><div class="note">全体の平均</div><div class="big-num num" id="dist-avg">—</div></div>
-                <div><div class="note">この距離での実力</div><div class="big-num num" id="dist-w" style="color:var(--c3)">—</div></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===== Ensemble ===== -->
-    <section id="ensemble" class="ch" data-title="合成">
-      <div class="wrap">
-        <span class="kicker">Chapter 4 · Ensemble</span>
-        <h2 class="h reveal">8 つの視点を、<br><em>ひとつの確率に。</em></h2>
-        <p class="lead reveal">着順全体を学ぶモデル、3 着以内を見分けるモデル、クラスや距離に特化したモデル──。性質の違う 8 つの能力モデルの評価を、<b>過去 4 年で 1〜3 着の並びを最もよく説明できた重み</b>で合成し、最後に市場（オッズ）の情報を合わせます。</p>
-        <div class="card reveal beams" style="margin-top:28px"><svg id="beams-svg" viewBox="0 0 900 300" role="img" aria-label="8 つのモデルの評価を合成する図"></svg>
-          <div class="legend" id="beams-legend"></div></div>
-        <div class="card reveal" style="margin-top:28px">
-          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
-            <h3 style="margin:0" id="ex-title">実際のレース</h3><span class="tag real">実際の予測（学習に使っていない年）</span>
-          </div>
-          <p class="note">各モデルの勝率を切り替えて比べてください。並びは実際の着順です。</p>
-          <div class="layers seg" id="ex-layers" role="group" aria-label="表示する確率"></div>
-          <div class="race-bars" id="ex-bars"></div>
-          <div class="tickets" id="ex-tickets"></div>
-          <p class="note" id="ex-note"></p>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===== Value ===== -->
-    <section id="value" class="ch" data-title="勝率と妙味">
-      <div class="wrap">
-        <span class="kicker">Chapter 5 · Value</span>
-        <h2 class="h reveal">「いちばん勝ちそう」は、<br><em>いちばんお得</em>とは限らない。</h2>
-        <p class="lead reveal">100 円が平均でいくらになって戻るか（期待値）は、<b>勝つ確率 × オッズ</b>で決まります。勝率が高くても、オッズが低すぎれば損になります。下の 3 頭のオッズを動かしてみてください。</p>
-        <div class="value-grid reveal" id="value-grid"></div>
-        <p class="note reveal" style="margin-top:14px"><span class="tag sim">簡略化した例</span>　勝率は架空の値で、最初のオッズは払戻率を差し引いた市場の値付けを想定しています（3 頭とも 100 円を下回ります）。オッズが「損益の分かれ目」を超えたときだけ、期待値は 100 円を超えます。実際の馬券は払戻率（約 75〜80%）が差し引かれるため、期待値が 1.0 を超える買い目は、AI と市場の評価がはっきり違うときにしか現れません。PRISM はさらに、過去に同じ条件の買い目が実際にどれだけ戻ったかで期待値を補正（較正）しています。</p>
-      </div>
-    </section>
-
-    <!-- ===== Accuracy ===== -->
-    <section id="accuracy" class="ch" data-title="精度">
-      <div class="wrap">
-        <span class="kicker">Chapter 6 · Accuracy</span>
-        <h2 class="h reveal">予想は、<em>確かに良くなった。</em><br>でも、それだけでは足りなかった。</h2>
-        <div class="grid2" style="margin-top:30px">
-          <div class="card reveal">
-            <h3>1 位の予想が食い違ったとき、勝ったのは？</h3>
-            <p class="note" id="duel-note"></p>
-            <div class="duel" id="duel"></div>
-          </div>
-          <div class="card reveal">
-            <h3>工程ごとの改善（オッズを使わない予想）</h3>
-            <p class="note">勝ち馬の対数損失（小さいほど良い）。どの改善も、学習に使っていない年で確認しています。</p>
-            <div class="seg" role="group" aria-label="期間" id="step-per"><button type="button" aria-pressed="false" data-p="dev">選択期間 2016〜20</button><button type="button" aria-pressed="true" data-p="test">検証期間 2021〜26</button></div>
-            <svg class="chart" id="step-svg" viewBox="0 0 520 240" role="img" aria-label="工程ごとの精度の改善"></svg>
-          </div>
-        </div>
-        <div class="grid2" style="margin-top:28px">
-          <div class="card reveal">
-            <h3>市場（オッズ）にどれだけ勝てたか</h3>
-            <p class="note">AI と市場を合わせた確率が、市場だけの確率より勝ち馬をどれだけよく当てたか（2021〜2026年。左に長いほど良い）。</p>
-            <svg class="chart" id="mkt-svg" viewBox="0 0 520 200" role="img" aria-label="市場との差"></svg>
-            <p class="note" id="mkt-note"></p>
-          </div>
-          <div class="card reveal">
-            <h3>精度が上がったのに、回収率が下がった理由</h3>
-            <p class="note">AI推奨（2021〜2026年）の回収率を、「市場と合わせた確率」と「AI だけの確率」の出どころを入れ替えて計算した表。行（市場と合わせた確率）で結果がほぼ決まります。</p>
-            <div class="heat" id="heat"></div>
-            <p class="note" id="heat-note" style="margin-top:12px"></p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===== ROI ===== -->
-    <section id="roi" class="ch" data-title="成績">
-      <div class="wrap">
-        <span class="kicker">Chapter 7 · Results</span>
-        <h2 class="h reveal">4 つの買い方の、<br><em>検証成績。</em></h2>
-        <p class="lead reveal" id="roi-lead"></p>
-        <div class="kpis reveal" id="kpis" role="group" aria-label="買い方の選択"></div>
-        <div class="card reveal">
-          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
-            <h3 style="margin:0" id="yr-title">年ごとの回収率</h3>
-            <div class="legend" style="margin:0"><span><i style="background:var(--c3)"></i>PRISM</span><span><i style="background:#58607a"></i>以前のモデル（v33）</span></div>
-          </div>
-          <svg class="chart" id="yr-svg" viewBox="0 0 900 300" role="img" aria-label="年ごとの回収率"></svg>
-          <p class="note" id="yr-note"></p>
-        </div>
-        <div class="cats" style="margin-top:28px">
-          <div class="card reveal"><h3>クラス別（AI推奨・2021〜26年）</h3><svg class="chart" id="cls-svg" viewBox="0 0 440 240" role="img" aria-label="クラス別の回収率"></svg></div>
-          <div class="card reveal"><h3>距離別（AI推奨・2021〜26年）</h3><svg class="chart" id="dst-svg" viewBox="0 0 440 240" role="img" aria-label="距離別の回収率"></svg></div>
-        </div>
-        <p class="note reveal" style="margin-top:12px">クラス別・距離別は新馬戦を含む全レースで集計しています（新馬戦の不振が、成績の表示から外した理由のひとつです）。レース数が少ない区分ほど、数字は偶然で大きく動きます。</p>
-      </div>
-    </section>
-
-    <!-- ===== G1/G2 ===== -->
-    <section id="g1g2" class="ch" data-title="G1・G2">
-      <div class="wrap">
-        <span class="kicker">Chapter 8 · Big races</span>
-        <h2 class="h reveal">G1・G2 で 69%。<br><em class="cool">それは「弱点」なのか。</em></h2>
-        <div class="grid2" style="margin-top:28px">
-          <div class="reveal">
-            <p class="lead" id="g1-lead"></p>
-            <div class="facts" id="g1-facts"></div>
-          </div>
-          <div class="card reveal">
-            <h3>偶然でも、69% はよく起きる</h3>
-            <p class="note" id="hist-note"></p>
-            <svg class="chart" id="hist-svg" viewBox="0 0 520 240" role="img" aria-label="無作為に選んだレースの回収率の分布"></svg>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===== Honest ===== -->
-    <section id="honest" class="ch" data-title="正直に">
-      <div class="wrap">
-        <span class="kicker">Chapter 9 · Honesty</span>
-        <h2 class="h reveal">数字の、<em>読み方。</em></h2>
-        <p class="lead reveal">PRISM は利益を約束しません。検証の数字を正しく読むために、知っておいてほしいことです。</p>
-        <div class="caveats" id="caveats"></div>
-      </div>
-    </section>
-
-    <section id="end" class="ch" data-title="おわりに">
-      <div class="wrap">
-        <p class="hero-tag">ONE RACE. MULTIPLE PERSPECTIVES.</p>
-        <h2 class="h">競馬AIは、ここまで進化した。</h2>
-        <p class="lead" style="margin-inline:auto">PRISM の予想と、レースごとの答え合わせは予想サイトで公開しています。</p>
-        <p style="margin-top:28px"><a class="btn primary" href="https://wata9857-ops.github.io/jra-ai-analytics-web/" rel="noopener">PRISM の予想を見る ›</a></p>
-      </div>
-    </section>
-  </main>
-  <footer class="foot">
-    <div class="wrap">
-      PRISM は過去のデータから確率を推定する予想エンジンです。表示している成績は過去の検証であり、将来の利益を保証するものではありません。<br>
-      馬券は 20 歳以上の方が、ご自身の判断で余裕資金の範囲でお楽しみください。JRA の公式サイトではありません。<br>
-      <span id="gen"></span>
-    </div>
-  </footer>
-  <script src="js/prism.js?v=2" type="module"></script>
+  <noscript><p style="padding:80px 20px;text-align:center">PRISM の紹介は JavaScript を使います。予想サイトは <a href="https://wata9857-ops.github.io/jra-ai-analytics-web/">こちら</a>。</p></noscript>
+  <script src="js/main.js?v=5" type="module"></script>
 </body>
 </html>
