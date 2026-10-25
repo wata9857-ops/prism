@@ -315,11 +315,11 @@ function beamsInto(box, split) {
   drawBeams(svg, 600, 220, split);
 }
 function drawBeams(svg, W, H, splitOnly) {
-  if (innerWidth < 700 && !splitOnly) { W = 520; H = 460; }
+  if (innerWidth < 700 && !splitOnly) { W = 400; H = 540; }
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
   svg.classList.add("chart");
   svg.innerHTML = "";
-  const fs = innerWidth < 700 ? 15 : 11;
+  const fs = innerWidth < 700 ? 13 : 11;
   const cy = H / 2, x0 = W * 0.16, x1 = W * 0.62, x2 = W * 0.86;
   el("path", { d: `M0 ${cy} L${x0} ${cy}`, stroke: "#fff", "stroke-width": 2.5, fill: "none" }, svg);
   el("path", { d: `M${x0} ${cy - 46} L${x0 + 40} ${cy + 40} L${x0 - 40} ${cy + 40} Z`, fill: "rgba(255,255,255,.05)", stroke: "rgba(255,255,255,.6)" }, svg);
